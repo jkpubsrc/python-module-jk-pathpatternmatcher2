@@ -21,9 +21,9 @@ setup(
 	classifiers = [
 		"Development Status :: 4 - Beta",
 		"License :: OSI Approved :: Apache Software License",
+		"Programming Language :: Python :: 3",
 	],
 	description = "A python module to perform simple pattern matching tasks on paths.",
-	download_url = "https://github.com/jkpubsrc/python-module-jk-pathpatternmatcher2/tarball/0.2020.3.11",
 	include_package_data = False,
 	install_requires = [
 	],
@@ -31,13 +31,12 @@ setup(
 		"filesystem",
 		"pattern-matching",
 	],
-	license = "Apache 2.0",
+	license = "Apache2",
 	name = "jk_pathpatternmatcher2",
 	packages = [
 		"jk_pathpatternmatcher2",
 	],
-	url = "https://github.com/jkpubsrc/python-module-jk-pathpatternmatcher2",
-	version = "0.2020.3.11",
+	version = "0.2020.10.16",
 	zip_safe = False,
 	long_description = readme(),
 	long_description_content_type="text/markdown",

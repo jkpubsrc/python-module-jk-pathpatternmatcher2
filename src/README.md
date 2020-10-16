@@ -1,4 +1,4 @@
-﻿jk_pathpatternmatcher2
+jk_pathpatternmatcher2
 ==========
 
 Introduction

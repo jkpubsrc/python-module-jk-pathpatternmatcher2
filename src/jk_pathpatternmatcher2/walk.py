@@ -111,7 +111,7 @@ def walk(*dirPaths,
 				allEntries = os.listdir(nextDirPath)
 			except Exception as ee:
 				if emitErrorEntries:
-					fullPath = os.path.join(nextDirPath, entry)
+					fullPath = nextDirPath
 					relPath = fullPath[removePathPrefixLen:]
 					yield Entry(fullPath, baseDirPath, relPath, None, None, "ed",
 						None,

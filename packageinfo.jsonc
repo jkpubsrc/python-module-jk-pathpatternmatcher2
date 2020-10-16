@@ -1,0 +1,63 @@
+{
+	"magic": {
+		"magic": "packageinfo",
+		"version": 2,
+	},
+	"meta": {
+		"name": "jk_pathpatternmatcher2",
+		"version": "0.2020.10.16",
+		"packageClass": "python-module",
+		"language": "python3",
+		"development_status": "beta",
+		"license": "Apache2",
+		"keywords": [
+			"filesystem",
+			"pattern-matching"
+		],
+		"description": "A python module to perform simple pattern matching tasks on paths.",
+		"authors": [
+			{
+				"name": "Jürgen Knauth",
+				"email": "pubsrc@binary-overflow.de"
+			}
+		],
+	},
+	"requirements": {
+		"python_packages": [
+		],
+		"python_packages_dev": [
+		],
+		"system_apt_packages": [
+		],
+	},
+	"source": {
+		"packages": [
+			"jk_pathpatternmatcher2"
+		],
+		"extra_data_files": [
+		],
+		"extra_binary_files": [
+		]
+	},
+	"documentation": [
+		/*
+		"wiki": {
+			"page": "DevDocs:jk_pathpatternmatcher2"
+		}
+		*/
+	],
+	"repositories": [
+		{
+			"type": "github",
+			"user": "jkpubsrc",
+			"project": "python-module-jk-pathpatternmatcher2",
+			"devon_publish": true
+		},
+		{
+			"type": "pypy",
+			"project": "jk_pathpatternmatcher2",
+			"devon_publish": true
+		}
+	],
+}
+
