@@ -1,4 +1,5 @@
 
+import os
 
 from .PathPatternMatcher import PathPatternMatcher
 from .PathPatternMatcherCollection import PathPatternMatcherCollection
@@ -40,17 +41,35 @@ def compilePattern(sPattern:str, raiseExceptionOnError:bool = True) -> PathPatte
 	assert isinstance(sPattern, str)
 
 	sOrgPattern = sPattern
-	bAbsolute = sPattern.startswith("/")
-	if bAbsolute:
+
+	# ----
+
+	bMatchAbsolutePath = sPattern.startswith("/")
+	if bMatchAbsolutePath:
 		sPattern = sPattern[1:]
+
+	#bMatchDirectoryOnly = False
+	if sPattern.endswith("/"):
+		# NOTE: for now we will not support directory matching (yet). This might change in future versions.
+		#bMatchDirectoryOnly = True
+		#sPattern = sPattern[:-1]
+		raise Exception("Failed to compile pattern: " + repr(sOrgPattern))
 
 	components = []
 	sPatternParts = sPattern.split("/")
 
-	for sPatternPart in sPatternParts:
-		components2 = []
+	for i, sPatternPart in enumerate(sPatternParts):
+		bFirst = i == 0
+		bLast = i == len(sPatternParts) - 1
+		bAddSlash = True
+
+		_temp = []
 		if sPatternPart == "**":
-			components2.append(".*")
+			if bLast:
+				_temp.append(".*")
+			else:
+				bAddSlash = False
+				_temp.append("(.*/)?")
 		else:
 			i = 0
 			while i < len(sPatternPart):
@@ -64,22 +83,31 @@ def compilePattern(sPattern:str, raiseExceptionOnError:bool = True) -> PathPatte
 						return None
 				repl = _REGEX_REPLACEMENT_MAP.get(p)
 				if repl is not None:
-					components2.append(repl)
+					_temp.append(repl)
 				else:
-					components2.append(p)
+					_temp.append(p)
 				i += 1
-		if not components2:
+
+		if not _temp:
 			# detected: "....//...."
 			if raiseExceptionOnError:
 				raise Exception("Failed to compile pattern: " + repr(sOrgPattern))
 			else:
 				return None
-		components.append("".join(components2))
 
-	ret = "/".join(components) + "$"
-	if bAbsolute:
-		return PathPatternMatcher(sOrgPattern, bAbsolute, "^/" + ret)
-	return PathPatternMatcher(sOrgPattern, bAbsolute, "^" + ret)
+		if bAddSlash:
+			_temp.append("/")
+
+		components.extend(_temp)
+
+	# we will likely have added a trailing slash
+	if components[-1] == "/":
+		del components[-1]
+
+	ret = "".join(components) + "$"
+	if bMatchAbsolutePath:
+		return PathPatternMatcher(sOrgPattern, bMatchAbsolutePath, "^/" + ret)
+	return PathPatternMatcher(sOrgPattern, bMatchAbsolutePath, "^" + ret)
 #
 
 

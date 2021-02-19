@@ -5,16 +5,16 @@
 	},
 	"meta": {
 		"name": "jk_pathpatternmatcher2",
-		"version": "0.2020.10.16",
+		"version": "0.2021.2.19",
 		"packageClass": "python-module",
 		"language": "python3",
-		"development_status": "beta",
+		"development_status": "stable",
 		"license": "Apache2",
 		"keywords": [
 			"filesystem",
 			"pattern-matching"
 		],
-		"description": "A python module to perform simple pattern matching tasks on paths.",
+		"description": "A python module to perform pattern matching tasks on paths.",
 		"authors": [
 			{
 				"name": "Jürgen Knauth",
@@ -24,6 +24,7 @@
 	},
 	"requirements": {
 		"python_packages": [
+			"jk_prettyprintobj",
 		],
 		"python_packages_dev": [
 		],
@@ -32,7 +33,7 @@
 	},
 	"source": {
 		"packages": [
-			"jk_pathpatternmatcher2"
+			"jk_pathpatternmatcher2",
 		],
 		"extra_data_files": [
 		],

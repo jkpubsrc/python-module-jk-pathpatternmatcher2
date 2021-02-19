@@ -1,7 +1,7 @@
 ﻿
 
 
-__version__ = "0.2020.10.16"
+__version__ = "0.2021.2.19"
 
 
 
@@ -10,8 +10,6 @@ from .PathPatternMatcherCollection import PathPatternMatcherCollection
 from .Entry import Entry
 from .pm import compilePattern
 from .walk import walk
-
-
 
 
 

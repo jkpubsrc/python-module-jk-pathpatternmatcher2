@@ -15,13 +15,43 @@ from .Entry import Entry
 
 
 
+def _cmpileEndExtend(existing, patterns):
+	if patterns:
+		r = compileAllPatterns(patterns)
+		if r is not None:
+			if existing is None:
+				existing = PathPatternMatcherCollection()
+			existing.extend(r)
+	return existing
+#
+
+
 
 #
-# Walks through all entries of a directory and returns them.
+# Traverse directory trees.
 #
-# @return	Entry[]		Returns an iterator over <c>Entry</c> objects. Each <c>Entry</c> object
+# @param		*dirPaths						(required) Provide one or more (!) directories here to traverse.
+# @param		str[] acceptDirPathPatterns		(optional)
+# @param		str[] acceptFilePathPatterns	(optional)
+# @param		str[] acceptLinkPathPatterns	(optional)
+# @param		str[] ignorePathPatterns		(optional) If specfied these are patterns of files/directories/links to ignore. Patterns are relative to the base directory traversed.
+# @param		str[] ignoreDirPathPatterns		(optional) If specfied these are patterns of directories to ignore. Patterns are relative to the base directory traversed.
+# @param		str[] ignoreFilePathPatterns	(optional) If specfied these are patterns of files to ignore. Patterns are relative to the base directory traversed.
+# @param		str[] ignoreLinkPathPatterns	(optional) If specfied these are patterns of links to ignore. Patterns are relative to the base directory traversed.
+# @param		bool emitDirs					(optional) If `True` function `walk(..)` will emit directory entries. (This option is `True` by default.)
+# @param		bool emitFiles					(optional) If `True` function `walk(..)` will emit file entries. (This option is `True` by default.)
+# @param		bool emitLinks					(optional) If `True` function `walk(..)` will emit link entries. (This option is `True` by default.)
+# @param		bool emitBaseDirs				(optional) If `True` function `walk(..)` will emit traversal root directory entries. (This option is `True` by default.)
+# @param		bool recursive					(optional) If `True` function `walk(..)` will traverse recursively through the specified directory tree. (This option is `True` by default.)
+# @param		bool sort						(optional) If `True` function `walk(..)` will sort all entries returns by name. (This option is `True` by default.)
+# @param		bool emitErrorEntries			(optional) If `True` function `walk(..)` will emit error entries. If `false` exceptions are raised. (This option is `True` by default.)
+# @param		type clazz						(optional) If a class is specified here instances of *this* class are instantiated instead of `Entry`.
+# @return		Entry[]							Returns an iterator over <c>Entry</c> objects. Each <c>Entry</c> object
 #
 def walk(*dirPaths,
+		acceptDirPathPatterns = None,
+		acceptFilePathPatterns = None,
+		acceptLinkPathPatterns = None,
 		ignorePathPatterns = None,
 		ignoreDirPathPatterns = None,
 		ignoreFilePathPatterns = None,
@@ -32,43 +62,42 @@ def walk(*dirPaths,
 		emitBaseDirs:bool = True,
 		recursive:bool = True,
 		sort:bool = True,
-		emitErrorEntries:bool = True
+		emitErrorEntries:bool = True,
+		clazz = None,
 	) -> typing.Iterator[Entry]:
 
-	ignorePathMatcher = None
+	if clazz is None:
+		clazz = Entry
+	else:
+		assert clazz.__class__ == type
+
 	ignoreDirPathMatcher = None
 	ignoreFilePathMatcher = None
 	ignoreLinkPathMatcher = None
 
 	if ignorePathPatterns:
-		ignorePathMatcher = compileAllPatterns(ignorePathPatterns)
 		ignoreFilePathMatcher = PathPatternMatcherCollection()
-		ignoreFilePathMatcher.extend(ignorePathMatcher)
 		ignoreDirPathMatcher = PathPatternMatcherCollection()
-		ignoreDirPathMatcher.extend(ignorePathMatcher)
 		ignoreLinkPathMatcher = PathPatternMatcherCollection()
-		ignoreLinkPathMatcher.extend(ignorePathMatcher)
 
-	if ignoreDirPathPatterns:
-		r = compileAllPatterns(ignoreDirPathPatterns)
-		if r is not None:
-			if ignoreDirPathMatcher is None:
-				ignoreDirPathMatcher = PathPatternMatcherCollection()
-			ignoreDirPathMatcher.extend(r)
+		_temp = compileAllPatterns(ignorePathPatterns)
+		ignoreFilePathMatcher.extend(_temp)
+		ignoreDirPathMatcher.extend(_temp)
+		ignoreLinkPathMatcher.extend(_temp)
 
-	if ignoreFilePathPatterns:
-		r = compileAllPatterns(ignoreFilePathPatterns)
-		if r is not None:
-			if ignoreFilePathMatcher is None:
-				ignoreFilePathMatcher = PathPatternMatcherCollection()
-			ignoreFilePathMatcher.extend(r)
+	ignoreDirPathMatcher = _cmpileEndExtend(ignoreDirPathMatcher, ignoreDirPathPatterns)
+	ignoreFilePathMatcher = _cmpileEndExtend(ignoreFilePathMatcher, ignoreFilePathPatterns)
+	ignoreLinkPathMatcher = _cmpileEndExtend(ignoreLinkPathMatcher, ignoreLinkPathPatterns)
 
-	if ignoreLinkPathPatterns:
-		r = compileAllPatterns(ignoreLinkPathPatterns)
-		if r is not None:
-			if ignoreLinkPathMatcher is None:
-				ignoreLinkPathMatcher = PathPatternMatcherCollection()
-			ignoreLinkPathMatcher.extend(r)
+	acceptDirPathMatcher = None
+	acceptFilePathMatcher = None
+	acceptLinkPathMatcher = None
+
+	acceptDirPathMatcher = _cmpileEndExtend(acceptDirPathMatcher, acceptDirPathPatterns)
+	acceptFilePathMatcher = _cmpileEndExtend(acceptFilePathMatcher, acceptFilePathPatterns)
+	acceptLinkPathMatcher = _cmpileEndExtend(acceptLinkPathMatcher, acceptLinkPathPatterns)
+
+	# ----
 
 	dirPaths2 = []
 	for d in dirPaths:
@@ -99,27 +128,17 @@ def walk(*dirPaths,
 
 			if bEmitBaseDir:
 				statResult = os.stat(baseDirPath)
-				yield Entry(baseDirPath, baseDirPath, "", nextDirPath, "", "d",
-					statResult.st_mtime,
-					statResult.st_uid,
-					statResult.st_gid,
-					statResult.st_size,
-					None,
-					None)
+				assert baseDirPath == nextDirPath			# ??? is this the case ???
+				yield Entry._createRootDir(clazz, baseDirPath, statResult)
 
 			try:
 				allEntries = os.listdir(nextDirPath)
 			except Exception as ee:
+				# can't process this directory
 				if emitErrorEntries:
 					fullPath = nextDirPath
 					relPath = fullPath[removePathPrefixLen:]
-					yield Entry(fullPath, baseDirPath, relPath, None, None, "ed",
-						None,
-						None,
-						None,
-						None,
-						None,
-						ee)
+					yield Entry._createReadDirError(clazz, baseDirPath, relPath, ee)
 				else:
 					raise
 				continue
@@ -132,60 +151,32 @@ def walk(*dirPaths,
 				relPath = fullPath[removePathPrefixLen:]
 				try:
 					statResult = os.stat(fullPath, follow_symlinks=False)
-					mode = statResult[stat.ST_MODE]
-					if stat.S_ISDIR(mode):
-						if ignoreDirPathMatcher and ignoreDirPathMatcher.match(fullPath, relPath):
+					if stat.S_ISDIR(statResult.st_mode):
+						if ignoreDirPathMatcher and ignoreDirPathMatcher.matchAR(fullPath, relPath):
 							continue
 
 						if emitDirs:
-							yield Entry(fullPath, baseDirPath, relPath, nextDirPath, entry, "d",
-								statResult.st_mtime,
-								statResult.st_uid,
-								statResult.st_gid,
-								statResult.st_size,
-								None,
-								None)
+							if acceptDirPathMatcher is None or acceptDirPathMatcher.matchAR(fullPath, relPath):
+								yield Entry._createDir(clazz, baseDirPath, relPath, statResult)
 
 						if recursive:
 							dirsToGo.append((fullPath, baseDirPath, removePathPrefixLen, False))
 
-					elif stat.S_ISLNK(mode):
-						if ignoreLinkPathMatcher and ignoreLinkPathMatcher.match(fullPath, relPath):
+					elif stat.S_ISLNK(statResult.st_mode):
+						if ignoreLinkPathMatcher and ignoreLinkPathMatcher.matchAR(fullPath, relPath):
 							continue
 
 						if emitFiles:
-							try:
-								yield Entry(fullPath, baseDirPath, relPath, nextDirPath, entry, "l",
-									statResult.st_mtime,
-									statResult.st_uid,
-									statResult.st_gid,
-									statResult.st_size,
-									os.readlink(fullPath),
-									None)
-							except Exception as ee:
-								if emitErrorEntries:
-									yield Entry(fullPath, baseDirPath, relPath, nextDirPath, entry, "el",
-										statResult.st_mtime,
-										statResult.st_uid,
-										statResult.st_gid,
-										statResult.st_size,
-										None,
-										ee)
-								else:
-									raise
+							if acceptLinkPathMatcher is None or acceptLinkPathMatcher.matchAR(fullPath, relPath):
+								yield Entry._createLink(clazz, baseDirPath, relPath, statResult)
 
-					elif stat.S_ISREG(mode):
-						if ignoreFilePathMatcher and ignoreFilePathMatcher.match(fullPath, relPath):
+					elif stat.S_ISREG(statResult.st_mode):
+						if ignoreFilePathMatcher and ignoreFilePathMatcher.matchAR(fullPath, relPath):
 							continue
 
 						if emitFiles:
-							yield Entry(fullPath, baseDirPath, relPath, nextDirPath, entry, "f",
-								statResult.st_mtime,
-								statResult.st_uid,
-								statResult.st_gid,
-								statResult.st_size,
-								None,
-								None)
+							if acceptFilePathMatcher is None or acceptFilePathMatcher.matchAR(fullPath, relPath):
+								yield Entry._createFile(clazz, baseDirPath, relPath, statResult)
 
 				except FileNotFoundError as ee:
 					# we end here if entry was a link but the link target does not exist

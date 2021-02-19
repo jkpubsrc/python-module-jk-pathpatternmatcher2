@@ -19,13 +19,14 @@ setup(
 	author = "Jürgen Knauth",
 	author_email = "pubsrc@binary-overflow.de",
 	classifiers = [
-		"Development Status :: 4 - Beta",
+		"Development Status :: 5 - Production/Stable",
 		"License :: OSI Approved :: Apache Software License",
 		"Programming Language :: Python :: 3",
 	],
-	description = "A python module to perform simple pattern matching tasks on paths.",
+	description = "A python module to perform pattern matching tasks on paths.",
 	include_package_data = False,
 	install_requires = [
+		"jk_prettyprintobj",
 	],
 	keywords = [
 		"filesystem",
@@ -36,7 +37,7 @@ setup(
 	packages = [
 		"jk_pathpatternmatcher2",
 	],
-	version = "0.2020.10.16",
+	version = "0.2021.2.19",
 	zip_safe = False,
 	long_description = readme(),
 	long_description_content_type="text/markdown",
