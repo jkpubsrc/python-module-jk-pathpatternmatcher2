@@ -5,3 +5,5 @@
 	* Revised unit tests
 	* Added more examples for `walk(..)`
 
+* 2020-02-22
+	* Refactoring of methods to give them more expressive names;

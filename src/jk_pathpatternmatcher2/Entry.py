@@ -15,16 +15,16 @@ import jk_prettyprintobj
 
 
 #
-# @field	str fullPath		The absolute file path to the entry
-# @field	str baseDirPath		The absolute directory path the search is based on
-# @field	str relPath			The relative path to the entry (based on <c>baseDirPath</c>)
-# @field	str dirPath			The directory the entry resides in
-# @field	str name			The name the entry
-# @field	str typeID			An entry type identifier:
-#								* "d" for directory
-#								* "f" for file
-#								* "l" for symbolic link
-#								* "e" for error in reading a directory
+# @field	str fullPath			The absolute file path to the entry
+# @field	str absBaseDirPath		The absolute directory path the search is based on
+# @field	str relFilePath			The relative path to the entry (based on <c>baseDirPath</c>)
+# @field	str dirPath				The directory the entry resides in
+# @field	str name				The name the entry
+# @field	str typeID				An entry type identifier:
+#									* "d" for directory
+#									* "f" for file
+#									* "l" for symbolic link
+#									* "e" for error in reading a directory
 #
 class Entry(jk_prettyprintobj.DumpMixin):
 
@@ -33,8 +33,8 @@ class Entry(jk_prettyprintobj.DumpMixin):
 	################################################################################################################################
 
 	def __init__(self,
-			baseDirPath:str,
-			relPath:str,
+			absBaseDirPath:str,
+			relFilePath:str,
 			typeID:str,
 			mtime:float,
 			uid:int,
@@ -43,8 +43,8 @@ class Entry(jk_prettyprintobj.DumpMixin):
 			exception:Exception,
 		):
 
-		self.baseDirPath = baseDirPath
-		self.relPath = relPath
+		self.baseDirPath = absBaseDirPath
+		self.relFilePath = relFilePath
 		self.typeID = typeID
 		self.mtime = mtime
 		self.uid = uid
@@ -54,7 +54,7 @@ class Entry(jk_prettyprintobj.DumpMixin):
 	#
 
 	################################################################################################################################
-	## Public Properties
+	## Public Deprecated Properties
 	################################################################################################################################
 
 	#
@@ -62,7 +62,7 @@ class Entry(jk_prettyprintobj.DumpMixin):
 	#
 	@property
 	def dirPath(self) -> str:
-		if self.relPath == "":
+		if self.relFilePath == "":
 			return self.baseDirPath
 		else:
 			return os.path.dirname(self.fullPath)
@@ -73,10 +73,33 @@ class Entry(jk_prettyprintobj.DumpMixin):
 	#
 	@property
 	def name(self) -> str:
-		if self.relPath == "":
+		if self.relFilePath == "":
 			return ""
 		else:
-			return os.path.basename(self.relPath)
+			return os.path.basename(self.relFilePath)
+	#
+
+	################################################################################################################################
+	## Public Properties
+	################################################################################################################################
+
+	@property
+	def relDirPath(self) -> str:
+		if self.relFilePath == "":
+			return self.baseDirPath
+		else:
+			return os.path.dirname(self.relFilePath)
+	#
+
+	#
+	# The name of this entry
+	#
+	@property
+	def fileName(self) -> str:
+		if self.relFilePath == "":
+			return ""
+		else:
+			return os.path.basename(self.relFilePath)
 	#
 
 	#
@@ -95,10 +118,10 @@ class Entry(jk_prettyprintobj.DumpMixin):
 	#
 	@property
 	def fullPath(self) -> str:
-		if self.relPath == "":
+		if self.relFilePath == "":
 			return self.baseDirPath
 		else:
-			return os.path.join(self.baseDirPath, self.relPath)
+			return os.path.join(self.baseDirPath, self.relFilePath)
 	#
 
 	#
@@ -106,7 +129,7 @@ class Entry(jk_prettyprintobj.DumpMixin):
 	#
 	@property
 	def isBaseDir(self) -> bool:
-		return self.relPath == ""
+		return self.relFilePath == ""
 	#
 
 	#
@@ -149,7 +172,7 @@ class Entry(jk_prettyprintobj.DumpMixin):
 		return [
 			"fullPath",
 			"baseDirPath",
-			"relPath",
+			"relFilePath",
 			"dirPath",
 			"name",
 			"typeID",
@@ -168,16 +191,16 @@ class Entry(jk_prettyprintobj.DumpMixin):
 
 	def __repr__(self):
 		if self.exception:
-			return "<{}({}, {}, {})>".format(self.__class__.__name__, self.typeID, repr(self.relPath), repr(self.exception))
+			return "<{}({}, {}, {})>".format(self.__class__.__name__, self.typeID, repr(self.relFilePath), repr(self.exception))
 		else:
-			return "<{}({}, {})>".format(self.__class__.__name__, self.typeID, repr(self.fullPath.relPath))
+			return "<{}({}, {})>".format(self.__class__.__name__, self.typeID, repr(self.fullPath.relFilePath))
 	#
 
 	def __str__(self):
 		if self.exception:
-			return "<{}({}, {}, {})>".format(self.__class__.__name__, self.typeID, repr(self.relPath), repr(self.exception))
+			return "<{}({}, {}, {})>".format(self.__class__.__name__, self.typeID, repr(self.relFilePath), repr(self.exception))
 		else:
-			return "<{}({}, {})>".format(self.__class__.__name__, self.typeID, repr(self.relPath))
+			return "<{}({}, {})>".format(self.__class__.__name__, self.typeID, repr(self.relFilePath))
 	#
 
 	################################################################################################################################
@@ -185,12 +208,12 @@ class Entry(jk_prettyprintobj.DumpMixin):
 	################################################################################################################################
 
 	@staticmethod
-	def _createDir(clazz, baseDirPath:str, relPath:str, statResult:os.stat_result):
+	def _createDir(clazz, baseDirPath:str, relFilePath:str, statResult:os.stat_result):
 		assert stat.S_ISDIR(statResult.st_mode)
 
 		return clazz(
 			baseDirPath,
-			relPath,
+			relFilePath,
 			"d",
 			statResult.st_mtime,
 			statResult.st_uid,
@@ -200,12 +223,12 @@ class Entry(jk_prettyprintobj.DumpMixin):
 	#
 
 	@staticmethod
-	def _createLink(clazz, baseDirPath:str, relPath:str, statResult:os.stat_result):
+	def _createLink(clazz, baseDirPath:str, relFilePath:str, statResult:os.stat_result):
 		assert stat.S_ISLNK(statResult.st_mode)
 
 		return clazz(
 			baseDirPath,
-			relPath,
+			relFilePath,
 			"l",
 			statResult.st_mtime,
 			statResult.st_uid,
@@ -215,10 +238,10 @@ class Entry(jk_prettyprintobj.DumpMixin):
 	#
 
 	@staticmethod
-	def _createReadDirError(clazz, baseDirPath:str, relPath:str, ee):
+	def _createReadDirError(clazz, baseDirPath:str, relFilePath:str, ee):
 		return clazz(
 			baseDirPath,
-			relPath,
+			relFilePath,
 			"e",
 			None,
 			None,
@@ -243,12 +266,12 @@ class Entry(jk_prettyprintobj.DumpMixin):
 	#
 
 	@staticmethod
-	def _createFile(clazz, baseDirPath:str, relPath:str, statResult:os.stat_result):
+	def _createFile(clazz, baseDirPath:str, relFilePath:str, statResult:os.stat_result):
 		assert stat.S_ISREG(statResult.st_mode)
 
 		return clazz(
 			baseDirPath,
-			relPath,
+			relFilePath,
 			"f",
 			statResult.st_mtime,
 			statResult.st_uid,
@@ -261,7 +284,7 @@ class Entry(jk_prettyprintobj.DumpMixin):
 
 
 
-#Entry = collections.namedtuple("Entry", [ "fullPath", "baseDirPath", "relPath", "dirPath", "name", "type", "mtime", "uid", "gid", "size", "linkText" ])
+#Entry = collections.namedtuple("Entry", [ "fullPath", "baseDirPath", "relFilePath", "dirPath", "name", "type", "mtime", "uid", "gid", "size", "linkText" ])
 
 
 
