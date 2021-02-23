@@ -40,6 +40,7 @@ class Entry(jk_prettyprintobj.DumpMixin):
 			uid:int,
 			gid:int,
 			size:int,
+			mode:int,
 			exception:Exception,
 		):
 
@@ -50,6 +51,7 @@ class Entry(jk_prettyprintobj.DumpMixin):
 		self.uid = uid
 		self.gid = gid
 		self.size = size
+		self.mode = mode
 		self.exception = exception
 	#
 
@@ -176,10 +178,11 @@ class Entry(jk_prettyprintobj.DumpMixin):
 			"dirPath",
 			"name",
 			"typeID",
+			"size",
 			"mtime",
 			"uid",
 			"gid",
-			"size",
+			"mode",
 			"linkText",
 			"exception",
 		]
@@ -219,6 +222,7 @@ class Entry(jk_prettyprintobj.DumpMixin):
 			statResult.st_uid,
 			statResult.st_gid,
 			statResult.st_size,
+			statResult.st_mode,
 			None)
 	#
 
@@ -234,6 +238,7 @@ class Entry(jk_prettyprintobj.DumpMixin):
 			statResult.st_uid,
 			statResult.st_gid,
 			statResult.st_size,
+			statResult.st_mode,
 			None)
 	#
 
@@ -243,6 +248,7 @@ class Entry(jk_prettyprintobj.DumpMixin):
 			baseDirPath,
 			relFilePath,
 			"e",
+			None,
 			None,
 			None,
 			None,
@@ -262,6 +268,7 @@ class Entry(jk_prettyprintobj.DumpMixin):
 			statResult.st_uid,
 			statResult.st_gid,
 			statResult.st_size,
+			statResult.st_mode,
 			None)
 	#
 
@@ -277,6 +284,7 @@ class Entry(jk_prettyprintobj.DumpMixin):
 			statResult.st_uid,
 			statResult.st_gid,
 			statResult.st_size,
+			statResult.st_mode,
 			None)
 	#
 

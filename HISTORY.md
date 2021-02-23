@@ -7,3 +7,6 @@
 
 * 2020-02-22
 	* Refactoring of methods to give them more expressive names;
+
+* 2020-02-23
+	* Added support for mode
