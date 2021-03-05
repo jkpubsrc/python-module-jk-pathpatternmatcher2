@@ -6,7 +6,8 @@ import os
 import collections
 import stat
 
-
+from .IWalkIOAdapter import IWalkIOAdapter
+from .ILocalDiskIOAdapter import ILocalDiskIOAdapter
 from .PathPatternMatcherCollection import PathPatternMatcherCollection
 from .PathPatternMatcher import PathPatternMatcher
 from .pm import compilePattern, compileAllPatterns
@@ -24,6 +25,11 @@ def _cmpileEndExtend(existing, patterns):
 			existing.extend(r)
 	return existing
 #
+
+
+
+
+
 
 
 
@@ -64,6 +70,7 @@ def walk(*dirPaths,
 		sort:bool = True,
 		emitErrorEntries:bool = True,
 		clazz = None,
+		ioAdapter:IWalkIOAdapter = None,
 	) -> typing.Iterator[Entry]:
 
 	if clazz is None:
@@ -99,6 +106,13 @@ def walk(*dirPaths,
 
 	# ----
 
+	if ioAdapter is None:
+		ioAdapter = ILocalDiskIOAdapter()
+	_lstat = ioAdapter.lstatCallback()
+	_listdir = ioAdapter.listdirCallback()
+
+	# ----
+
 	dirPaths2 = []
 	for d in dirPaths:
 		if isinstance(d, (list, tuple)):
@@ -127,12 +141,12 @@ def walk(*dirPaths,
 			del dirsToGo[0]
 
 			if bEmitBaseDir:
-				statResult = os.stat(baseDirPath)
+				statResult = _lstat(baseDirPath)
 				assert baseDirPath == nextDirPath			# ??? is this the case ???
 				yield Entry._createRootDir(clazz, baseDirPath, statResult)
 
 			try:
-				allEntries = os.listdir(nextDirPath)
+				allEntries = _listdir(nextDirPath)
 			except Exception as ee:
 				# can't process this directory
 				if emitErrorEntries:
@@ -150,7 +164,7 @@ def walk(*dirPaths,
 				fullPath = os.path.join(nextDirPath, entry)
 				relPath = fullPath[removePathPrefixLen:]
 				try:
-					statResult = os.stat(fullPath, follow_symlinks=False)
+					statResult = _lstat(fullPath)
 					if stat.S_ISDIR(statResult.st_mode):
 						if ignoreDirPathMatcher and ignoreDirPathMatcher.matchAR(fullPath, relPath):
 							continue

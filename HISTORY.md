@@ -10,3 +10,8 @@
 
 * 2020-02-23
 	* Added support for mode
+
+* 2020-03-05
+	* Added support for I/O adapters to walk(..)
+	* Added I/O adapter for SFTP (based on fabric)
+

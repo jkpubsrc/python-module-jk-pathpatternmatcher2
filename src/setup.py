@@ -37,7 +37,7 @@ setup(
 	packages = [
 		"jk_pathpatternmatcher2",
 	],
-	version = "0.2021.2.23",
+	version = "0.2021.3.5",
 	zip_safe = False,
 	long_description = readme(),
 	long_description_content_type="text/markdown",
