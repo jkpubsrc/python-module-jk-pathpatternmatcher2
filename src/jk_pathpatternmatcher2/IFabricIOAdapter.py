@@ -12,7 +12,7 @@ from .IWalkIOAdapter import IWalkIOAdapter
 try:
 	import fabric
 
-	class IFabricSSHIOAdapter(IWalkIOAdapter):
+	class IFabricIOAdapter(IWalkIOAdapter):
 
 		def __init__(self, host:str = None, port:int = None, user:str = None, pwd:str = None, c:fabric.Connection = None):
 			if c:
@@ -34,7 +34,7 @@ try:
 
 except Exception as ee:
 
-	class IFabricSSHIOAdapter(IWalkIOAdapter):
+	class IFabricIOAdapter(IWalkIOAdapter):
 
 		def __init__(self, **kwargs):
 			raise Exception("'fabric' is not installed!")

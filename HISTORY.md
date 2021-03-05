@@ -14,4 +14,5 @@
 * 2020-03-05
 	* Added support for I/O adapters to walk(..)
 	* Added I/O adapter for SFTP (based on fabric)
+	* Added I/O adapter for SFTP (based on paramico)
 

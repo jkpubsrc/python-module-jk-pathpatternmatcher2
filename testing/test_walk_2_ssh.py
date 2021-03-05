@@ -30,7 +30,7 @@ if not PASSWORD:
 
 with jk_logging.wrapMain() as log:
 
-	ioAdapter = IFabricSSHIOAdapter(host=HOST, port=PORT, user=USER, pwd=PASSWORD)
+	ioAdapter = IFabricIOAdapter(host=HOST, port=PORT, user=USER, pwd=PASSWORD)
 
 	nTotalErrors = 0
 	nTotalFiles = 0
