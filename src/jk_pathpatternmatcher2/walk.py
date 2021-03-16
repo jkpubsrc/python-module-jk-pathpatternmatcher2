@@ -16,13 +16,21 @@ from .Entry import Entry
 
 
 
-def _cmpileEndExtend(existing, patterns):
-	if patterns:
+def _cmpileEndExtend(existing, patternOrPatterns):
+	if patternOrPatterns:
+		if isinstance(patternOrPatterns, str):
+			patterns = [ patternOrPatterns ]
+		elif isinstance(patternOrPatterns, (tuple, list)):
+			patterns = patternOrPatterns
+		else:
+			raise TypeError(str(type(patternOrPatterns)))
+
 		r = compileAllPatterns(patterns)
 		if r is not None:
 			if existing is None:
 				existing = PathPatternMatcherCollection()
 			existing.extend(r)
+
 	return existing
 #
 
@@ -36,23 +44,23 @@ def _cmpileEndExtend(existing, patterns):
 #
 # Traverse directory trees.
 #
-# @param		*dirPaths						(required) Provide one or more (!) directories here to traverse.
-# @param		str[] acceptDirPathPatterns		(optional)
-# @param		str[] acceptFilePathPatterns	(optional)
-# @param		str[] acceptLinkPathPatterns	(optional)
-# @param		str[] ignorePathPatterns		(optional) If specfied these are patterns of files/directories/links to ignore. Patterns are relative to the base directory traversed.
-# @param		str[] ignoreDirPathPatterns		(optional) If specfied these are patterns of directories to ignore. Patterns are relative to the base directory traversed.
-# @param		str[] ignoreFilePathPatterns	(optional) If specfied these are patterns of files to ignore. Patterns are relative to the base directory traversed.
-# @param		str[] ignoreLinkPathPatterns	(optional) If specfied these are patterns of links to ignore. Patterns are relative to the base directory traversed.
-# @param		bool emitDirs					(optional) If `True` function `walk(..)` will emit directory entries. (This option is `True` by default.)
-# @param		bool emitFiles					(optional) If `True` function `walk(..)` will emit file entries. (This option is `True` by default.)
-# @param		bool emitLinks					(optional) If `True` function `walk(..)` will emit link entries. (This option is `True` by default.)
-# @param		bool emitBaseDirs				(optional) If `True` function `walk(..)` will emit traversal root directory entries. (This option is `True` by default.)
-# @param		bool recursive					(optional) If `True` function `walk(..)` will traverse recursively through the specified directory tree. (This option is `True` by default.)
-# @param		bool sort						(optional) If `True` function `walk(..)` will sort all entries returns by name. (This option is `True` by default.)
-# @param		bool emitErrorEntries			(optional) If `True` function `walk(..)` will emit error entries. If `false` exceptions are raised. (This option is `True` by default.)
-# @param		type clazz						(optional) If a class is specified here instances of *this* class are instantiated instead of `Entry`.
-# @return		Entry[]							Returns an iterator over <c>Entry</c> objects. Each <c>Entry</c> object
+# @param		*dirPaths							(required) Provide one or more (!) directories here to traverse.
+# @param		str|str[] acceptDirPathPatterns		(optional)
+# @param		str|str[] acceptFilePathPatterns	(optional)
+# @param		str|str[] acceptLinkPathPatterns	(optional)
+# @param		str|str[] ignorePathPatterns		(optional) If specfied these are patterns of files/directories/links to ignore. Patterns are relative to the base directory traversed.
+# @param		str|str[] ignoreDirPathPatterns		(optional) If specfied these are patterns of directories to ignore. Patterns are relative to the base directory traversed.
+# @param		str|str[] ignoreFilePathPatterns	(optional) If specfied these are patterns of files to ignore. Patterns are relative to the base directory traversed.
+# @param		str|str[] ignoreLinkPathPatterns	(optional) If specfied these are patterns of links to ignore. Patterns are relative to the base directory traversed.
+# @param		bool emitDirs						(optional) If `True` function `walk(..)` will emit directory entries. (This option is `True` by default.)
+# @param		bool emitFiles						(optional) If `True` function `walk(..)` will emit file entries. (This option is `True` by default.)
+# @param		bool emitLinks						(optional) If `True` function `walk(..)` will emit link entries. (This option is `True` by default.)
+# @param		bool emitBaseDirs					(optional) If `True` function `walk(..)` will emit traversal root directory entries. (This option is `True` by default.)
+# @param		bool recursive						(optional) If `True` function `walk(..)` will traverse recursively through the specified directory tree. (This option is `True` by default.)
+# @param		bool sort							(optional) If `True` function `walk(..)` will sort all entries returns by name. (This option is `True` by default.)
+# @param		bool emitErrorEntries				(optional) If `True` function `walk(..)` will emit error entries. If `false` exceptions are raised. (This option is `True` by default.)
+# @param		type clazz							(optional) If a class is specified here instances of *this* class are instantiated instead of `Entry`.
+# @return		Entry[]								Returns an iterator over <c>Entry</c> objects. Each <c>Entry</c> object
 #
 def walk(*dirPaths,
 		acceptDirPathPatterns = None,
@@ -86,6 +94,9 @@ def walk(*dirPaths,
 		ignoreFilePathMatcher = PathPatternMatcherCollection()
 		ignoreDirPathMatcher = PathPatternMatcherCollection()
 		ignoreLinkPathMatcher = PathPatternMatcherCollection()
+
+		if isinstance(ignorePathPatterns, str):
+			ignorePathPatterns = [ ignorePathPatterns ]
 
 		_temp = compileAllPatterns(ignorePathPatterns)
 		ignoreFilePathMatcher.extend(_temp)
