@@ -196,7 +196,7 @@ class Entry(jk_prettyprintobj.DumpMixin):
 		if self.exception:
 			return "<{}({}, {}, {})>".format(self.__class__.__name__, self.typeID, repr(self.relFilePath), repr(self.exception))
 		else:
-			return "<{}({}, {})>".format(self.__class__.__name__, self.typeID, repr(self.fullPath.relFilePath))
+			return "<{}({}, {})>".format(self.__class__.__name__, self.typeID, repr(self.relFilePath))
 	#
 
 	def __str__(self):
