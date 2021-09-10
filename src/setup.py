@@ -27,6 +27,7 @@ setup(
 	include_package_data = False,
 	install_requires = [
 		"jk_prettyprintobj",
+		"jk_typing",
 	],
 	keywords = [
 		"filesystem",
@@ -37,7 +38,7 @@ setup(
 	packages = [
 		"jk_pathpatternmatcher2",
 	],
-	version = "0.2021.3.16.1",
+	version = "0.2021.9.10",
 	zip_safe = False,
 	long_description = readme(),
 	long_description_content_type="text/markdown",

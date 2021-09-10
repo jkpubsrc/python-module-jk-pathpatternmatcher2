@@ -5,8 +5,9 @@ import typing
 import os
 import collections
 import stat
-import pwd
-import grp
+if os.name != "nt":
+	import pwd
+	import grp
 
 import jk_prettyprintobj
 
@@ -147,6 +148,8 @@ class Entry(jk_prettyprintobj.DumpMixin):
 	#
 	@property
 	def group(self) -> typing.Union[str,None]:
+		if os.name == "nt":
+			return None
 		x = grp.getgrgid(self.gid)
 		if x:
 			return x.gr_name
@@ -159,6 +162,8 @@ class Entry(jk_prettyprintobj.DumpMixin):
 	#
 	@property
 	def user(self) -> typing.Union[str,None]:
+		if os.name == "nt":
+			return None
 		x = pwd.getpwuid(self.uid)
 		if x:
 			return x.pw_name

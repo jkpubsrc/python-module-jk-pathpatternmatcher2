@@ -20,3 +20,6 @@
 	* Added support for `str` in addition to `str[]` for `walk(..)`
 	* Bugfix for `__repr__()` in `Entry`.
 
+* 2021-09-10
+	* Added compatiblity to Microsoft Windows
+
