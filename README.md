@@ -8,7 +8,7 @@ This python module perform pattern matching tasks on paths.
 
 Information about this module can be found here:
 
-* [github.org](https://github.com/jkpubsrc/python-module-jk-pathpatternmatcher2)
+* [github.com](https://github.com/jkpubsrc/python-module-jk-pathpatternmatcher2)
 * [pypi.python.org](https://pypi.python.org/pypi/jk_pathpatternmatcher2)
 
 Why this module?
